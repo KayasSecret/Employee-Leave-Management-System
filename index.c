@@ -21,19 +21,22 @@ void applyLeave();
 void viewLeaveBalance();
 void approveLeave();
 void deleteEmployee();
+void searchEmployee();
 
+// Main Function
 int main() {
     int choice;
 
     do {
-        printf("\n========== Employee Leave Management System ==========\n");
+        printf("\n================ EMPLOYEE LEAVE MANAGEMENT SYSTEM ================\n");
         printf("1. Add Employee\n");
         printf("2. View All Employees\n");
         printf("3. Apply Leave\n");
         printf("4. View Leave Balance\n");
         printf("5. Approve Leave (Admin)\n");
         printf("6. Delete Employee\n");
-        printf("7. Exit\n");
+        printf("7. Search Employee\n");
+        printf("8. Exit\n");
         printf("Enter your choice: ");
         scanf("%d", &choice);
 
@@ -44,43 +47,66 @@ int main() {
             case 4: viewLeaveBalance(); break;
             case 5: approveLeave(); break;
             case 6: deleteEmployee(); break;
-            case 7: printf("Exiting System... Thank You!\n"); break;
+            case 7: searchEmployee(); break;
+            case 8: printf("Exiting System... Thank You!\n"); break;
             default: printf("Invalid Choice! Try Again.\n");
         }
-    } while(choice != 7);
+    } while(choice != 8);
 
     return 0;
 }
 
 // Add Employee
 void addEmployee() {
+    int newId, i;
+
     printf("\nEnter Employee ID: ");
-    scanf("%d", &emp[count].id);
+    scanf("%d", &newId);
+
+    // Duplicate ID Check
+    for(i = 0; i < count; i++) {
+        if(emp[i].id == newId) {
+            printf("Employee ID already exists!\n");
+            return;
+        }
+    }
+
+    emp[count].id = newId;
 
     printf("Enter Employee Name: ");
-    scanf("%s", emp[count].name);
+    scanf(" %[^\n]", emp[count].name);
 
-    emp[count].totalLeave = 30;   // default leave
+    emp[count].totalLeave = 30;
     emp[count].usedLeave = 0;
 
     count++;
     printf("Employee Added Successfully!\n");
 }
 
-// View Employees
+// View Employees (Table Format)
 void viewEmployee() {
     int i;
+
     if(count == 0) {
-        printf("No Employee Record Found!\n");
+        printf("\nNo Employee Record Found!\n");
         return;
     }
 
-    printf("\nID\tName\tTotal\tUsed\n");
+    printf("\n+------------------------------------------------------------------+\n");
+    printf("| S.No | ID   | Name              | Total Leave | Used | Remaining |\n");
+    printf("+------------------------------------------------------------------+\n");
+
     for(i = 0; i < count; i++) {
-        printf("%d\t%s\t%d\t%d\n",
-               emp[i].id, emp[i].name,
-               emp[i].totalLeave, emp[i].usedLeave);
+        printf("| %-4d | %-4d | %-17s | %-11d | %-4d | %-9d |\n",
+               i + 1,
+               emp[i].id,
+               emp[i].name,
+               emp[i].totalLeave,
+               emp[i].usedLeave,
+               emp[i].totalLeave - emp[i].usedLeave);
     }
+
+    printf("+------------------------------------------------------------------+\n");
 }
 
 // Apply Leave
@@ -119,8 +145,10 @@ void viewLeaveBalance() {
 
     for(i = 0; i < count; i++) {
         if(emp[i].id == id) {
-            printf("Employee Name: %s\n", emp[i].name);
-            printf("Remaining Leave: %d\n",
+            printf("\nEmployee Name : %s\n", emp[i].name);
+            printf("Total Leave   : %d\n", emp[i].totalLeave);
+            printf("Used Leave    : %d\n", emp[i].usedLeave);
+            printf("Remaining     : %d\n",
                    emp[i].totalLeave - emp[i].usedLeave);
             return;
         }
@@ -128,9 +156,9 @@ void viewLeaveBalance() {
     printf("Employee Not Found!\n");
 }
 
-// Approve Leave (Dummy Admin)
+// Approve Leave (Demo)
 void approveLeave() {
-    printf("All Leave Requests are Auto Approved (Demo Mode).\n");
+    printf("\nAll Leave Requests are Auto Approved (Demo Mode).\n");
 }
 
 // Delete Employee
@@ -147,6 +175,28 @@ void deleteEmployee() {
             }
             count--;
             printf("Employee Deleted Successfully!\n");
+            return;
+        }
+    }
+    printf("Employee Not Found!\n");
+}
+
+// Search Employee
+void searchEmployee() {
+    int id, i;
+
+    printf("Enter Employee ID to Search: ");
+    scanf("%d", &id);
+
+    for(i = 0; i < count; i++) {
+        if(emp[i].id == id) {
+            printf("\nEmployee Found!\n");
+            printf("ID        : %d\n", emp[i].id);
+            printf("Name      : %s\n", emp[i].name);
+            printf("Total     : %d\n", emp[i].totalLeave);
+            printf("Used      : %d\n", emp[i].usedLeave);
+            printf("Remaining : %d\n",
+                   emp[i].totalLeave - emp[i].usedLeave);
             return;
         }
     }
