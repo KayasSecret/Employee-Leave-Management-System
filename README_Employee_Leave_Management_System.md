@@ -1,4 +1,3 @@
-
 # 🏢 Employee Leave Management System (C Language)
 
 ## 📌 Project Overview
