@@ -1,9 +1,16 @@
 #include <stdio.h>
+#include <stdlib.h>
 #include <string.h>
 
+/* -------- MCRS FUNCTION ------*/
 #define MAX 100
 
-// Structure for Employee
+/* ---------- COLORS ---------- */
+#define YELLOW "\033[33m"
+#define CYAN   "\033[36m"
+#define RESET  "\033[0m"
+
+/* ---------- Structure ---------- */
 struct Employee {
     int id;
     char name[50];
@@ -13,92 +20,211 @@ struct Employee {
 
 struct Employee emp[MAX];
 int count = 0;
+FILE *fp;
 
-// Function Declarations
+/* ---------- Utility ---------- */
+void line() {
+    printf(YELLOW "============================================\n" RESET);
+}
+
+/* ---------- Function Declarations ---------- */
+void loadFromFile();
+void saveToFile();
+
+void adminLogin();
+void employeeLogin();
+
+void adminMenu();
+void employeeMenu(int index);
+
 void addEmployee();
 void viewEmployee();
-void applyLeave();
-void viewLeaveBalance();
-void approveLeave();
 void deleteEmployee();
-void searchEmployee();
 
-// Main Function
+void applyLeave(int index);
+void viewLeaveBalance(int index);
+
+/* ================= MAIN ================= */
 int main() {
     int choice;
+    loadFromFile();
 
     do {
-        printf("\n================ EMPLOYEE LEAVE MANAGEMENT SYSTEM ================\n");
-        printf("1. Add Employee\n");
-        printf("2. View All Employees\n");
-        printf("3. Apply Leave\n");
-        printf("4. View Leave Balance\n");
-        printf("5. Approve Leave (Admin)\n");
-        printf("6. Delete Employee\n");
-        printf("7. Search Employee\n");
-        printf("8. Exit\n");
-        printf("Enter your choice: ");
+        line();
+        printf(CYAN "   EMPLOYEE LEAVE MANAGEMENT SYSTEM\n" RESET);
+        line();
+        printf(CYAN "1. Admin Login\n" RESET);
+        printf(CYAN "2. Employee Login\n" RESET);
+        printf(CYAN "3. Exit\n" RESET);
+        line();
+        printf(CYAN "Enter your choice: " RESET);
+        scanf("%d", &choice);
+
+        switch(choice) {
+            case 1: adminLogin(); break;
+            case 2: employeeLogin(); break;
+            case 3:
+                saveToFile();
+                printf(CYAN "Data Saved. Exiting...\n" RESET);
+                break;
+            default:
+                printf(CYAN "Invalid Choice!\n" RESET);
+        }
+    } while(choice != 3);
+
+    return 0;
+}
+
+/* ================= FILE HANDLING ================= */
+void loadFromFile() {
+    fp = fopen("employee.dat", "rb");
+    if(fp == NULL) {
+        count = 0;
+        return;
+    }
+    fread(&count, sizeof(int), 1, fp);
+    fread(emp, sizeof(struct Employee), count, fp);
+    fclose(fp);
+}
+
+void saveToFile() {
+    fp = fopen("employee.dat", "wb");
+    fwrite(&count, sizeof(int), 1, fp);
+    fwrite(emp, sizeof(struct Employee), count, fp);
+    fclose(fp);
+}
+
+/* ================= ADMIN LOGIN ================= */
+void adminLogin() {
+    char user[20], pass[20];
+
+    line();
+    printf(CYAN "            ADMIN LOGIN\n" RESET);
+    line();
+    printf(CYAN "Username: " RESET);
+    scanf("%s", user);
+    printf(CYAN "Password: " RESET);
+    scanf("%s", pass);
+
+    if(strcmp(user, "Arvind") == 0 && strcmp(pass, "mca25") == 0) {
+        adminMenu();
+    } else {
+        printf(CYAN "Invalid Admin Credentials!\n" RESET);
+    }
+}
+
+/* ================= EMPLOYEE LOGIN ================= */
+void employeeLogin() {
+    int id, i;
+
+    line();
+    printf(CYAN "           EMPLOYEE LOGIN\n" RESET);
+    line();
+    printf(CYAN "Enter Employee ID: " RESET);
+    scanf("%d", &id);
+
+    for(i = 0; i < count; i++) {
+        if(emp[i].id == id) {
+            employeeMenu(i);
+            return;
+        }
+    }
+    printf(CYAN "Employee Not Found!\n" RESET);
+}
+
+/* ================= ADMIN MENU ================= */
+void adminMenu() {
+    int choice;
+    do {
+        line();
+        printf(CYAN "              ADMIN MENU\n" RESET);
+        line();
+        printf(CYAN "1. Add Employee\n" RESET);
+        printf(CYAN "2. View All Employees\n" RESET);
+        printf(CYAN "3. Delete Employee\n" RESET);
+        printf(CYAN "4. Logout\n" RESET);
+        line();
+        printf(CYAN "Enter choice: " RESET);
         scanf("%d", &choice);
 
         switch(choice) {
             case 1: addEmployee(); break;
             case 2: viewEmployee(); break;
-            case 3: applyLeave(); break;
-            case 4: viewLeaveBalance(); break;
-            case 5: approveLeave(); break;
-            case 6: deleteEmployee(); break;
-            case 7: searchEmployee(); break;
-            case 8: printf("Exiting System... Thank You!\n"); break;
-            default: printf("Invalid Choice! Try Again.\n");
+            case 3: deleteEmployee(); break;
+            case 4:
+                saveToFile();
+                printf(CYAN "Admin Logged Out!\n" RESET);
+                break;
+            default:
+                printf(CYAN "Invalid Choice!\n" RESET);
         }
-    } while(choice != 8);
-
-    return 0;
+    } while(choice != 4);
 }
 
-// Add Employee
-void addEmployee() {
-    int newId, i;
+/* ================= EMPLOYEE MENU ================= */
+void employeeMenu(int index) {
+    int choice;
+    do {
+        line();
+        printf(CYAN "            EMPLOYEE MENU\n" RESET);
+        line();
+        printf(CYAN "1. Apply Leave\n" RESET);
+        printf(CYAN "2. View Leave Balance\n" RESET);
+        printf(CYAN "3. Logout\n" RESET);
+        line();
+        printf(CYAN "Enter choice: " RESET);
+        scanf("%d", &choice);
 
-    printf("\nEnter Employee ID: ");
-    scanf("%d", &newId);
-
-    // Duplicate ID Check
-    for(i = 0; i < count; i++) {
-        if(emp[i].id == newId) {
-            printf("Employee ID already exists!\n");
-            return;
+        switch(choice) {
+            case 1: applyLeave(index); break;
+            case 2: viewLeaveBalance(index); break;
+            case 3:
+                saveToFile();
+                printf(CYAN "Employee Logged Out!\n" RESET);
+                break;
+            default:
+                printf(CYAN "Invalid Choice!\n" RESET);
         }
-    }
+    } while(choice != 3);
+}
 
-    emp[count].id = newId;
+/* ================= ADD EMPLOYEE ================= */
+void addEmployee() {
+    line();
+    printf(CYAN "           ADD EMPLOYEE\n" RESET);
+    line();
 
-    printf("Enter Employee Name: ");
-    scanf(" %[^\n]", emp[count].name);
+    printf(CYAN "Enter Employee ID: " RESET);
+    scanf("%d", &emp[count].id);
+
+    printf(CYAN "Enter Employee Name: " RESET);
+    getchar();
+    fgets(emp[count].name, sizeof(emp[count].name), stdin);
+    emp[count].name[strcspn(emp[count].name, "\n")] = '\0';
 
     emp[count].totalLeave = 30;
     emp[count].usedLeave = 0;
 
     count++;
-    printf("Employee Added Successfully!\n");
+    saveToFile();
+
+    printf(CYAN "Employee Added Successfully!\n" RESET);
 }
 
-// View Employees (Table Format)
+/* ================= VIEW EMPLOYEE ================= */
 void viewEmployee() {
     int i;
-
     if(count == 0) {
-        printf("\nNo Employee Record Found!\n");
+        printf(CYAN "No Employee Record Found!\n" RESET);
         return;
     }
 
-    printf("\n+------------------------------------------------------------------+\n");
-    printf("| S.No | ID   | Name              | Total Leave | Used | Remaining |\n");
-    printf("+------------------------------------------------------------------+\n");
+    printf(CYAN "\n+------+----------------------+--------+--------+-----------+\n" RESET);
+    printf(CYAN "| ID   | Name                 | Total  | Used   | Remaining |\n" RESET);
+    printf(CYAN "+------+----------------------+--------+--------+-----------+\n" RESET);
 
     for(i = 0; i < count; i++) {
-        printf("| %-4d | %-4d | %-17s | %-11d | %-4d | %-9d |\n",
-               i + 1,
+        printf(CYAN "| %-4d | %-20s | %-6d | %-6d | %-9d |\n" RESET,
                emp[i].id,
                emp[i].name,
                emp[i].totalLeave,
@@ -106,66 +232,41 @@ void viewEmployee() {
                emp[i].totalLeave - emp[i].usedLeave);
     }
 
-    printf("+------------------------------------------------------------------+\n");
+    printf(CYAN "+------+----------------------+--------+--------+-----------+\n" RESET);
 }
 
-// Apply Leave
-void applyLeave() {
-    int id, days, i, found = 0;
+/* ================= APPLY LEAVE ================= */
+void applyLeave(int index) {
+    int days;
+    printf(CYAN "Enter Leave Days: " RESET);
+    scanf("%d", &days);
 
-    printf("Enter Employee ID: ");
-    scanf("%d", &id);
-
-    for(i = 0; i < count; i++) {
-        if(emp[i].id == id) {
-            found = 1;
-            printf("Enter Leave Days: ");
-            scanf("%d", &days);
-
-            if(emp[i].usedLeave + days <= emp[i].totalLeave) {
-                emp[i].usedLeave += days;
-                printf("Leave Applied Successfully!\n");
-            } else {
-                printf("Not Enough Leave Balance!\n");
-            }
-            break;
-        }
+    if(emp[index].usedLeave + days <= emp[index].totalLeave) {
+        emp[index].usedLeave += days;
+        saveToFile();
+        printf(CYAN "Leave Applied Successfully!\n" RESET);
+    } else {
+        printf(CYAN "Not Enough Leave Balance!\n" RESET);
     }
-
-    if(!found)
-        printf("Employee Not Found!\n");
 }
 
-// View Leave Balance
-void viewLeaveBalance() {
-    int id, i;
-
-    printf("Enter Employee ID: ");
-    scanf("%d", &id);
-
-    for(i = 0; i < count; i++) {
-        if(emp[i].id == id) {
-            printf("\nEmployee Name : %s\n", emp[i].name);
-            printf("Total Leave   : %d\n", emp[i].totalLeave);
-            printf("Used Leave    : %d\n", emp[i].usedLeave);
-            printf("Remaining     : %d\n",
-                   emp[i].totalLeave - emp[i].usedLeave);
-            return;
-        }
-    }
-    printf("Employee Not Found!\n");
+/* ================= VIEW LEAVE BALANCE ================= */
+void viewLeaveBalance(int index) {
+    line();
+    printf(CYAN "          LEAVE BALANCE\n" RESET);
+    line();
+    printf(CYAN "Name       : %s\n" RESET, emp[index].name);
+    printf(CYAN "Total Leave: %d\n" RESET, emp[index].totalLeave);
+    printf(CYAN "Used Leave : %d\n" RESET, emp[index].usedLeave);
+    printf(CYAN "Remaining  : %d\n" RESET,
+           emp[index].totalLeave - emp[index].usedLeave);
+    line();
 }
 
-// Approve Leave (Demo)
-void approveLeave() {
-    printf("\nAll Leave Requests are Auto Approved (Demo Mode).\n");
-}
-
-// Delete Employee
+/* ================= DELETE EMPLOYEE ================= */
 void deleteEmployee() {
     int id, i, j;
-
-    printf("Enter Employee ID to Delete: ");
+    printf(CYAN "Enter Employee ID to Delete: " RESET);
     scanf("%d", &id);
 
     for(i = 0; i < count; i++) {
@@ -174,31 +275,10 @@ void deleteEmployee() {
                 emp[j] = emp[j + 1];
             }
             count--;
-            printf("Employee Deleted Successfully!\n");
+            saveToFile();
+            printf(CYAN "Employee Deleted Successfully!\n" RESET);
             return;
         }
     }
-    printf("Employee Not Found!\n");
-}
-
-// Search Employee
-void searchEmployee() {
-    int id, i;
-
-    printf("Enter Employee ID to Search: ");
-    scanf("%d", &id);
-
-    for(i = 0; i < count; i++) {
-        if(emp[i].id == id) {
-            printf("\nEmployee Found!\n");
-            printf("ID        : %d\n", emp[i].id);
-            printf("Name      : %s\n", emp[i].name);
-            printf("Total     : %d\n", emp[i].totalLeave);
-            printf("Used      : %d\n", emp[i].usedLeave);
-            printf("Remaining : %d\n",
-                   emp[i].totalLeave - emp[i].usedLeave);
-            return;
-        }
-    }
-    printf("Employee Not Found!\n");
+    printf(CYAN "Employee Not Found!\n" RESET);
 }
