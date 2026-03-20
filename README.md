@@ -96,8 +96,6 @@ gcc index.c -o index.exe
 - Password for Employees  
 - Leave Approval System  
 - Date-wise Leave History  
-- Export Data to Text / CSV  
-- Role-based Access  
 
 ---
 
