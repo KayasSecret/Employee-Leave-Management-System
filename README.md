@@ -10,7 +10,7 @@ Welcome to the **Employee Leave Management System**, a complete **console-based 
 - ➕ Add New Employees  
 - 👀 View All Employee Records in Tabular Format  
 - ❌ Delete Employee Records  
-- 💾 Automatic Data Saving using Binary Files  
+- 💾 Automatic Data Saving using Binary Files (EXE FORMAT) 
 
 ### 👨‍💼 Employee Module
 - 🔑 Login using Employee ID  
